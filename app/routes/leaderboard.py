@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from datetime import datetime
 from app.schemas.leaderboard import LeaderboardEntry, ScoreUpdate
 from app.services.leaderboard_service import LeaderboardService
 from app.core.database import get_database
@@ -15,9 +16,9 @@ async def get_top_n_leaderboard(n: int, db=Depends(get_database)):
     for i, entry in enumerate(entries):
         result.append({
             "user_id": entry.get("user_id"),
-            "score": entry.get("score"),
+            "score": int(entry.get("score") or 0),
             "rank": i + 1,
-            "last_updated": entry.get("last_updated"),
+            "last_updated": entry.get("last_updated") or datetime.utcnow(),
         })
 
     return result
@@ -72,10 +73,9 @@ async def get_user_entry(user_id: str, db=Depends(get_database)):
         raise HTTPException(status_code=404, detail="user not found")
 
     rank = await service.get_rank(user_id)
-
     return {
-        "user_id": doc.get("user_id"),
-        "score": doc.get("score"),
-        "rank": rank or 0,
-        "last_updated": doc.get("last_updated"),
+        "user_id": doc.get("user_id") or user_id,
+        "score": int(doc.get("score") or 0),
+        "rank": int(rank or 0),
+        "last_updated": doc.get("last_updated") or datetime.utcnow(),
     }
