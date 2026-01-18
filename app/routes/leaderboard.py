@@ -23,6 +23,14 @@ async def get_top_n_leaderboard(n: int, db=Depends(get_database)):
     return result
 
 
+@router.post("/reset")
+async def reset_leaderboard(db = Depends(get_database)):
+    """Reset the leaderboard by removing all entries. Returns deleted count."""
+    service = LeaderboardService(db)
+    deleted = await service.reset_leaderboard()
+    return {"status": "ok", "deleted": deleted}
+
+
 @router.post("/{user_id}")
 async def update_score(
     user_id: str,
@@ -37,11 +45,3 @@ async def update_score(
     )
 
     return {"status": "ok"}
-
-
-@router.post("/reset")
-async def reset_leaderboard(db = Depends(get_database)):
-    """Reset the leaderboard by removing all entries. Returns deleted count."""
-    service = LeaderboardService(db)
-    deleted = await service.reset_leaderboard()
-    return {"status": "ok", "deleted": deleted}
