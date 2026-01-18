@@ -35,9 +35,7 @@ class LeaderboardService:
 
         return rank
 
-    async def get_entry(self, user_id: str):
-        """Return the raw leaderboard document for a user or None if not found."""
-        return await self.collection.find_one({"user_id": user_id})
+    # `get_entry` removed — user retrieval is handled elsewhere previously
 
     async def reset_leaderboard(self) -> int:
         """Delete all entries from the leaderboard collection.
