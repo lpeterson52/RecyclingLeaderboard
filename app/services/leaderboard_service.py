@@ -46,5 +46,11 @@ class LeaderboardService:
 
     async def remove_user(self, user_id: str) -> int:
         """Remove a single user by user_id. Returns number of documents deleted (0 or 1)."""
+        # Prefer deleting by _id (current schema). If nothing deleted,
+        # try deleting by legacy `user_id` field.
         result = await self.collection.delete_one({"_id": user_id})
-        return int(getattr(result, "deleted_count", 0))
+        deleted = int(getattr(result, "deleted_count", 0))
+        if deleted == 0:
+            result2 = await self.collection.delete_one({"user_id": user_id})
+            deleted = int(getattr(result2, "deleted_count", 0))
+        return deleted

@@ -39,8 +39,10 @@ async def get_user(user_id: str, db = Depends(get_database)):
     """
     service = LeaderboardService(db)
 
-    # find the document (stored with _id == user_id)
+    # find the document (try current `_id` schema first, then legacy `user_id`)
     user = await service.collection.find_one({"_id": user_id})
+    if not user:
+        user = await service.collection.find_one({"user_id": user_id})
     if not user:
         raise HTTPException(status_code=404, detail="user not found")
 
