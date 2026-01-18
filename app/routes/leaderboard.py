@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.leaderboard import LeaderboardEntry, ScoreUpdate
 from app.services.leaderboard_service import LeaderboardService
 from app.core.database import get_database
+from datetime import datetime
 
 router = APIRouter(prefix="/leaderboard", tags=["leaderboard"])
 
@@ -29,6 +30,28 @@ async def reset_leaderboard(db = Depends(get_database)):
     service = LeaderboardService(db)
     deleted = await service.reset_leaderboard()
     return {"status": "ok", "deleted": deleted}
+
+@router.get("/{user_id}", response_model=LeaderboardEntry)
+async def get_user(user_id: str, db = Depends(get_database)):
+    """Return a single leaderboard entry by user id.
+
+    Returns 404 if the user is not found.
+    """
+    service = LeaderboardService(db)
+
+    # find the document (stored with _id == user_id)
+    user = await service.collection.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+
+    rank = await service.get_rank(user_id)
+
+    return {
+        "user_id": str(user.get("_id")),
+        "score": int(user.get("score") or 0),
+        "rank": int(rank or 0),
+        "last_updated": user.get("last_updated") or datetime.utcnow(),
+    }
 
 
 @router.get("/reset")
