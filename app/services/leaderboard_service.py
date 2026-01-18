@@ -43,3 +43,8 @@ class LeaderboardService:
         result = await self.collection.delete_many({})
         # Motor's DeleteResult exposes `deleted_count`
         return int(getattr(result, "deleted_count", 0))
+
+    async def remove_user(self, user_id: str) -> int:
+        """Remove a single user by user_id. Returns number of documents deleted (0 or 1)."""
+        result = await self.collection.delete_one({"_id": user_id})
+        return int(getattr(result, "deleted_count", 0))

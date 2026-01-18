@@ -54,6 +54,16 @@ async def get_user(user_id: str, db = Depends(get_database)):
     }
 
 
+@router.delete("/{user_id}")
+async def remove_user(user_id: str, db = Depends(get_database)):
+    """Delete a leaderboard entry by user id."""
+    service = LeaderboardService(db)
+    deleted = await service.remove_user(user_id)
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="user not found")
+    return {"status": "ok", "deleted": deleted}
+
+
 @router.get("/reset")
 async def reset_leaderboard_get(db = Depends(get_database)):
     """Reset the leaderboard via GET (convenience) — identical to POST /reset."""
