@@ -37,3 +37,11 @@ async def update_score(
     )
 
     return {"status": "ok"}
+
+
+@router.post("/reset")
+async def reset_leaderboard(db = Depends(get_database)):
+    """Reset the leaderboard by removing all entries. Returns deleted count."""
+    service = LeaderboardService(db)
+    deleted = await service.reset_leaderboard()
+    return {"status": "ok", "deleted": deleted}

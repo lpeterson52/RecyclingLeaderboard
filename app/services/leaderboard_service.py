@@ -33,3 +33,13 @@ class LeaderboardService:
         }) + 1
 
         return rank
+
+    async def reset_leaderboard(self) -> int:
+        """Delete all entries from the leaderboard collection.
+
+        Returns:
+            int: number of deleted documents
+        """
+        result = await self.collection.delete_many({})
+        # Motor's DeleteResult exposes `deleted_count`
+        return int(getattr(result, "deleted_count", 0))
