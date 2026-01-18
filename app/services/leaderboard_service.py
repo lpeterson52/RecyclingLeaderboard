@@ -7,11 +7,12 @@ class LeaderboardService:
     async def upsert_score(self, user_id: str, score: int):
         """Upsert a user's score in the leaderboard (no username stored)."""
         await self.collection.update_one(
-            {"_id": user_id},
+            {"user_id": user_id},
             {
                 "$set": {
+                    "user_id": user_id,
                     "score": score,
-                    "last_updated": datetime.utcnow()
+                    "last_updated": datetime.utcnow(),
                 }
             },
             upsert=True,
@@ -24,7 +25,7 @@ class LeaderboardService:
             .to_list(length=n)
 
     async def get_rank(self, user_id: str):
-        user = await self.collection.find_one({"_id": user_id})
+        user = await self.collection.find_one({"user_id": user_id})
         if not user:
             return None
 
@@ -33,6 +34,10 @@ class LeaderboardService:
         }) + 1
 
         return rank
+
+    async def get_entry(self, user_id: str):
+        """Return the raw leaderboard document for a user or None if not found."""
+        return await self.collection.find_one({"user_id": user_id})
 
     async def reset_leaderboard(self) -> int:
         """Delete all entries from the leaderboard collection.

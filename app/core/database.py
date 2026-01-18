@@ -44,4 +44,10 @@ async def ensure_indexes():
 	db = await get_database()
 	# index on score descending for fast top-N queries
 	await db.leaderboard.create_index([("score", -1)])
+	# ensure uniqueness of user_id
+	try:
+		await db.leaderboard.create_index("user_id", unique=True)
+	except Exception:
+		# index creation may fail if index exists with different options; ignore
+		pass
 

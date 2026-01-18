@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.leaderboard import LeaderboardEntry, ScoreUpdate
 from app.services.leaderboard_service import LeaderboardService
 from app.core.database import get_database
@@ -14,7 +14,7 @@ async def get_top_n_leaderboard(n: int, db=Depends(get_database)):
     result = []
     for i, entry in enumerate(entries):
         result.append({
-            "user_id": str(entry.get("_id")),
+            "user_id": entry.get("user_id"),
             "score": entry.get("score"),
             "rank": i + 1,
             "last_updated": entry.get("last_updated"),
@@ -61,3 +61,21 @@ async def update_score(
     )
 
     return {"status": "ok"}
+
+
+@router.get("/{user_id}", response_model=LeaderboardEntry)
+async def get_user_entry(user_id: str, db=Depends(get_database)):
+    """Get a leaderboard entry by `user_id`. Returns 404 if not found."""
+    service = LeaderboardService(db)
+    doc = await service.get_entry(user_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="user not found")
+
+    rank = await service.get_rank(user_id)
+
+    return {
+        "user_id": doc.get("user_id"),
+        "score": doc.get("score"),
+        "rank": rank or 0,
+        "last_updated": doc.get("last_updated"),
+    }
