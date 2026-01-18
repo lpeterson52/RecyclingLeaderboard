@@ -6,7 +6,7 @@ package (v2 separate package). It validates the located symbol is a
 class before using it as a base class.
 """
 
-from typing import Any
+import os
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
@@ -17,8 +17,9 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-    MONGO_URI: str = "mongodb://localhost:27017"
-    MONGO_DB: str = "recycling_db"
+    # prefer explicit MONGO_URI, fallback to MONGO_URL, then default
+    MONGO_URI: str = os.getenv("MONGO_URI") or os.getenv("MONGO_URL") or "mongodb://localhost:27017"
+    MONGO_DB: str = os.getenv("MONGO_DB") or "recycling_db"
 
 
-settings: Any = Settings()
+settings = Settings()
