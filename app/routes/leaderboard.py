@@ -31,6 +31,22 @@ async def reset_leaderboard(db = Depends(get_database)):
     return {"status": "ok", "deleted": deleted}
 
 
+@router.get("/reset")
+async def reset_leaderboard_get(db = Depends(get_database)):
+    """Reset the leaderboard via GET (convenience) — identical to POST /reset."""
+    service = LeaderboardService(db)
+    deleted = await service.reset_leaderboard()
+    return {"status": "ok", "deleted": deleted}
+
+
+@router.post("/reset-all")
+async def reset_leaderboard_alias(db = Depends(get_database)):
+    """Alias endpoint for resetting the leaderboard."""
+    service = LeaderboardService(db)
+    deleted = await service.reset_leaderboard()
+    return {"status": "ok", "deleted": deleted}
+
+
 @router.post("/{user_id}")
 async def update_score(
     user_id: str,
