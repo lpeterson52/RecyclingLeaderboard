@@ -4,18 +4,17 @@ class LeaderboardService:
     def __init__(self, db):
         self.collection = db.leaderboard
 
-    async def upsert_score(self, user_id: str, username: str, score: int):
-        """Upsert a user's score in the leaderboard."""
+    async def upsert_score(self, user_id: str, score: int):
+        """Upsert a user's score in the leaderboard (no username stored)."""
         await self.collection.update_one(
             {"_id": user_id},
             {
                 "$set": {
-                    "username": username,
                     "score": score,
                     "last_updated": datetime.utcnow()
                 }
             },
-            upsert=True
+            upsert=True,
         )
 
     async def get_top_n(self, n: int):

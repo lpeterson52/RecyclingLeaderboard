@@ -3,7 +3,6 @@ from datetime import datetime
 
 class LeaderboardEntry(BaseModel):
     user_id: str
-    username: str
     score: int
     rank: int
     last_updated: datetime

@@ -15,10 +15,9 @@ async def get_top_n_leaderboard(n: int, db=Depends(get_database)):
     for i, entry in enumerate(entries):
         result.append({
             "user_id": str(entry.get("_id")),
-            "username": entry.get("username"),
             "score": entry.get("score"),
             "rank": i + 1,
-            "last_updated": entry.get("last_updated")
+            "last_updated": entry.get("last_updated"),
         })
 
     return result
@@ -32,11 +31,9 @@ async def update_score(
 ):
     service = LeaderboardService(db)
 
-    # username would usually come from auth
     await service.upsert_score(
         user_id=user_id,
-        username="placeholder",
-        score=payload.score
+        score=payload.score,
     )
 
     return {"status": "ok"}
